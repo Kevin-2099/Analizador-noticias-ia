@@ -5,3 +5,4 @@ torch
 pandas
 langdetect
 lxml-html-clean
+sentencepiece
