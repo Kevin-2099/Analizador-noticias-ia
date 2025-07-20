@@ -1,0 +1,7 @@
+gradio
+newspaper3k
+transformers
+torch
+pandas
+langdetect
+lxml-html-clean
