@@ -1,4 +1,3 @@
-
 import gradio as gr
 from newspaper import Article
 from transformers import pipeline, MarianMTModel, MarianTokenizer
@@ -7,7 +6,6 @@ from langdetect import detect
 import datetime
 import pandas as pd
 import torch
-import numpy as np
 
 # ============== MODELOS ==============
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
@@ -20,6 +18,9 @@ en_to_es_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-en-es")
 
 es_to_en_tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-es-en")
 es_to_en_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-es-en")
+
+# DataFrame global para logs en la sesión
+log_df = pd.DataFrame(columns=["fecha_registro", "url", "titulo", "fecha_articulo", "idioma", "resumen", "sentimiento"])
 
 # ============== FUNCIONES ==============
 
@@ -45,6 +46,7 @@ def analizar_sentimiento(texto):
     return sentimiento
 
 def guardar_log(url, titulo, fecha, idioma, resumen, sentimiento):
+    global log_df
     log_entry = {
         "fecha_registro": datetime.datetime.now().isoformat(),
         "url": url,
@@ -55,13 +57,11 @@ def guardar_log(url, titulo, fecha, idioma, resumen, sentimiento):
         "sentimiento": sentimiento
     }
 
-    try:
-        df = pd.read_csv("logs_resumenes.csv")
-        df = pd.concat([df, pd.DataFrame([log_entry])], ignore_index=True)
-    except FileNotFoundError:
-        df = pd.DataFrame([log_entry])
+    # Agregar fila al DataFrame global
+    log_df = pd.concat([log_df, pd.DataFrame([log_entry])], ignore_index=True)
 
-    df.to_csv("logs_resumenes.csv", index=False)
+    # Guardar en CSV local
+    log_df.to_csv("logs_resumenes.csv", index=False)
 
 def procesar_noticia(url):
     try:
@@ -78,7 +78,6 @@ def procesar_noticia(url):
 
         idioma = detect(texto)
 
-        # Texto para resumen
         texto_resumen = texto
         if idioma == 'en':
             texto_resumen = traducir(texto, origen='en', destino='es')
@@ -89,35 +88,23 @@ def procesar_noticia(url):
         resumen = summarizer(texto_resumen, max_length=150, min_length=40, do_sample=False)[0]['summary_text']
         sentimiento = analizar_sentimiento(texto_resumen)
 
-        # Guardar log con datos originales (resumen en español)
         guardar_log(url, titulo, fecha, idioma, resumen, sentimiento)
 
-        # Preparar la salida según idioma original
         if idioma == 'en':
             resumen = traducir(resumen, origen='es', destino='en')
             sentimiento = traducir(sentimiento, origen='es', destino='en')
-            salida = f"📰 **Title:** {titulo}
-📅 **Date:** {fecha}
-🌍 **Detected language:** {idioma}
-
-🔎 **Summary:**
-{resumen}
-
-💬 **Sentiment:** {sentimiento}"
+            salida = f"📰 **Title:** {titulo}\n📅 **Date:** {fecha}\n🌍 **Detected language:** {idioma}\n\n🔎 **Summary:**\n{resumen}\n\n💬 **Sentiment:** {sentimiento}"
         else:
-            salida = f"📰 **Título:** {titulo}
-📅 **Fecha:** {fecha}
-🌍 **Idioma detectado:** {idioma}
-
-🔎 **Resumen:**
-{resumen}
-
-💬 **Sentimiento:** {sentimiento}"
+            salida = f"📰 **Título:** {titulo}\n📅 **Fecha:** {fecha}\n🌍 **Idioma detectado:** {idioma}\n\n🔎 **Resumen:**\n{resumen}\n\n💬 **Sentimiento:** {sentimiento}"
 
         return salida
 
     except Exception as e:
         return f"❌ Error al procesar la noticia: {e}"
+
+def descargar_csv():
+    # Devuelve la ruta del CSV para descargar
+    return "logs_resumenes.csv"
 
 # ============== INTERFAZ GRADIO ==============
 
@@ -127,7 +114,19 @@ iface = gr.Interface(
     outputs="markdown",
     title="🧠 Analizador IA de Noticias",
     description="Introduce la URL de una noticia. El sistema hará scraping, resumirá el contenido, detectará idioma, analizará sentimiento y mostrará todo.",
-    theme="default"
+    theme="default",
+    live=False,
 )
 
-iface.launch()
+download_button = gr.File(label="Descargar CSV con todos los resúmenes", file_types=['.csv'], interactive=True)
+
+with gr.Blocks() as demo:
+    url_input = gr.Textbox(lines=2, label="URL de noticia")
+    output_md = gr.Markdown()
+    btn_analizar = gr.Button("Analizar noticia")
+    btn_descargar = gr.Button("Descargar CSV")
+
+    btn_analizar.click(procesar_noticia, inputs=url_input, outputs=output_md)
+    btn_descargar.click(descargar_csv, outputs=download_button)
+
+demo.launch()
