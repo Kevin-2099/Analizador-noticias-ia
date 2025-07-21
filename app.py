@@ -19,8 +19,14 @@ en_to_es_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-en-es")
 es_to_en_tokenizer = MarianTokenizer.from_pretrained("Helsinki-NLP/opus-mt-es-en")
 es_to_en_model = MarianMTModel.from_pretrained("Helsinki-NLP/opus-mt-es-en")
 
-# DataFrame global para logs en la sesión
-log_df = pd.DataFrame(columns=["fecha_registro", "url", "titulo", "fecha_articulo", "idioma", "resumen", "sentimiento"])
+# CSV path
+CSV_PATH = "logs_resumenes.csv"
+
+# Inicializar logs si no existe
+try:
+    log_df = pd.read_csv(CSV_PATH)
+except FileNotFoundError:
+    log_df = pd.DataFrame(columns=["fecha_registro", "url", "titulo", "fecha_articulo", "idioma", "resumen", "sentimiento"])
 
 # ============== FUNCIONES ==============
 
@@ -45,25 +51,8 @@ def analizar_sentimiento(texto):
     sentimiento = ["Muy negativo", "Negativo", "Neutral", "Positivo", "Muy positivo"][estrellas - 1]
     return sentimiento
 
-def guardar_log(url, titulo, fecha, idioma, resumen, sentimiento):
-    global log_df
-    log_entry = {
-        "fecha_registro": datetime.datetime.now().isoformat(),
-        "url": url,
-        "titulo": titulo,
-        "fecha_articulo": fecha,
-        "idioma": idioma,
-        "resumen": resumen,
-        "sentimiento": sentimiento
-    }
-
-    # Agregar fila al DataFrame global
-    log_df = pd.concat([log_df, pd.DataFrame([log_entry])], ignore_index=True)
-
-    # Guardar en CSV local
-    log_df.to_csv("logs_resumenes.csv", index=False)
-
 def procesar_noticia(url):
+    global log_df
     try:
         article = Article(url)
         article.download()
@@ -74,7 +63,7 @@ def procesar_noticia(url):
         texto = article.text
 
         if len(texto) < 200:
-            return "❌ El artículo es demasiado corto para analizarlo."
+            return "❌ El artículo es demasiado corto para analizarlo.", None
 
         idioma = detect(texto)
 
@@ -88,8 +77,21 @@ def procesar_noticia(url):
         resumen = summarizer(texto_resumen, max_length=150, min_length=40, do_sample=False)[0]['summary_text']
         sentimiento = analizar_sentimiento(texto_resumen)
 
-        guardar_log(url, titulo, fecha, idioma, resumen, sentimiento)
+        # Guardar log
+        log_entry = {
+            "fecha_registro": datetime.datetime.now().isoformat(),
+            "url": url,
+            "titulo": titulo,
+            "fecha_articulo": fecha,
+            "idioma": idioma,
+            "resumen": resumen,
+            "sentimiento": sentimiento
+        }
 
+        log_df = pd.concat([log_df, pd.DataFrame([log_entry])], ignore_index=True)
+        log_df.to_csv(CSV_PATH, index=False)
+
+        # Preparar salida
         if idioma == 'en':
             resumen = traducir(resumen, origen='es', destino='en')
             sentimiento = traducir(sentimiento, origen='es', destino='en')
@@ -97,36 +99,22 @@ def procesar_noticia(url):
         else:
             salida = f"📰 **Título:** {titulo}\n📅 **Fecha:** {fecha}\n🌍 **Idioma detectado:** {idioma}\n\n🔎 **Resumen:**\n{resumen}\n\n💬 **Sentimiento:** {sentimiento}"
 
-        return salida
+        return salida, CSV_PATH
 
     except Exception as e:
-        return f"❌ Error al procesar la noticia: {e}"
-
-def descargar_csv():
-    # Devuelve la ruta del CSV para descargar
-    return "logs_resumenes.csv"
+        return f"❌ Error al procesar la noticia: {e}", None
 
 # ============== INTERFAZ GRADIO ==============
 
-iface = gr.Interface(
+demo = gr.Interface(
     fn=procesar_noticia,
     inputs=gr.Textbox(lines=2, label="URL de noticia"),
-    outputs="markdown",
+    outputs=[
+        gr.Markdown(label="Resultado"),
+        gr.File(label="Descargar historial CSV")
+    ],
     title="🧠 Analizador IA de Noticias",
-    description="Introduce la URL de una noticia. El sistema hará scraping, resumirá el contenido, detectará idioma, analizará sentimiento y mostrará todo.",
-    theme="default",
-    live=False,
+    description="Introduce la URL de una noticia. El sistema hará scraping, resumirá el contenido, detectará idioma, analizará sentimiento y generará un CSV descargable con el historial.",
 )
-
-download_button = gr.File(label="Descargar CSV con todos los resúmenes", file_types=['.csv'], interactive=True)
-
-with gr.Blocks() as demo:
-    url_input = gr.Textbox(lines=2, label="URL de noticia")
-    output_md = gr.Markdown()
-    btn_analizar = gr.Button("Analizar noticia")
-    btn_descargar = gr.Button("Descargar CSV")
-
-    btn_analizar.click(procesar_noticia, inputs=url_input, outputs=output_md)
-    btn_descargar.click(descargar_csv, outputs=download_button)
 
 demo.launch()
