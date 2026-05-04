@@ -1,8 +1,13 @@
 gradio
 newspaper3k
-transformers
-torch
+transformers==4.56.0
+torch>=2.0.0
 pandas
 langdetect
 lxml-html-clean
 sentencepiece
+trafilatura
+tenacity
+loguru
+fpdf2
+plotly
