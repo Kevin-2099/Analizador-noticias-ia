@@ -73,12 +73,12 @@ El sistema no solo resume noticias, sino que también evalúa su sentimiento, se
 - 📊 Frontend
   - Gradio
   - Plotly
-📦 Instalación
+## 📦 Instalación
 
 Clona el repositorio:
 
-git clone https://github.com/Kevin-2099/analizador-ia-noticias.git
-cd analizador-ia-noticias
+git clone https://github.com/Kevin-2099/Analizador-noticias-ia.git
+cd Analizador-noticias-ia
 
 Crea un entorno virtual (opcional pero recomendado):
 
@@ -92,7 +92,7 @@ pip install -r requirements.txt
 ⚠️ Asegúrate de tener PyTorch instalado correctamente:
 https://pytorch.org/get-started/locally/
 
-🧪 Uso
+## 🧪 Uso
 
 Ejecuta la aplicación:
 
@@ -101,41 +101,38 @@ python app.py
 Abre el navegador en:
 
 http://127.0.0.1:7860
-📌 Cómo usar
-🔹 Análisis individual
-Introduce una URL
-Selecciona idioma de salida
-Haz clic en Analizar
-🔹 Análisis en lote
-Introduce múltiples URLs (una por línea)
-🔹 Comparativa
-Introduce 2 o 3 URLs para comparar cobertura mediática
-📊 Resultados obtenidos
-📰 Título y fecha
-🌍 Idioma original
-🏷️ Tema
-⚖️ Sesgo
-⭐ Credibilidad
-✂️ Resumen
-💬 Sentimiento
-👤 Entidades detectadas
-⚡ Indicador de caché
-📄 Licencia
-
-Este proyecto está bajo licencia MIT.
-Consulta el archivo LICENSE para más información.
-
-🤝 Contribuciones
-
-Las contribuciones son bienvenidas.
-
-Puedes:
-
-Hacer fork del repositorio
-Crear una nueva rama (feature/nueva-funcionalidad)
-Enviar un pull request
-
+## 📌 Cómo usar
+- 🔹 Análisis individual
+  - Introduce una URL
+  - Selecciona idioma de salida
+  - Haz clic en Analizar
+- 🔹 Análisis en lote
+  - Introduce múltiples URLs (una por línea)
+- 🔹 Comparativa
+  - Introduce 2 o 3 URLs para comparar cobertura mediática
+## 📊 Resultados obtenidos
+- 📰 Título y fecha
+- 🌍 Idioma original
+- 🏷️ Tema
+- ⚖️ Sesgo
+- ⭐ Credibilidad
+- ✂️ Resumen
+- 💬 Sentimiento
+- 👤 Entidades detectadas
+- ⚡ Indicador de caché
 ## 📄 Licencia
-Este proyecto se distribuye bajo la licencia MIT. Ver archivo LICENSE para más detalles.
 
-Hacer pull requests
+Este proyecto se distribuye bajo una **licencia propietaria con acceso al código (source-available)**.
+
+El código fuente se pone a disposición únicamente para fines de **visualización, evaluación y aprendizaje**.
+
+❌ No está permitido copiar, modificar, redistribuir, sublicenciar, ni crear obras derivadas del software o de su código fuente sin autorización escrita expresa del titular de los derechos.
+
+❌ El uso comercial del software, incluyendo su oferta como servicio (SaaS), su integración en productos comerciales o su uso en entornos de producción, requiere un **acuerdo de licencia comercial independiente**.
+
+📌 El texto **legalmente vinculante** de la licencia es la versión en inglés incluida en el archivo `LICENSE`. 
+
+Se proporciona una traducción al español en `LICENSE_ES.md` únicamente con fines informativos. En caso de discrepancia, prevalece la versión en inglés.
+
+## Autor
+Kevin-2099
