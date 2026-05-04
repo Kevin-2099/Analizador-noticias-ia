@@ -1,84 +1,139 @@
-# Analizador-noticias-ia
-Este proyecto es una aplicación interactiva construida con Gradio que permite analizar automáticamente artículos de noticias desde una URL.
+## 🧠 Analizador IA de Noticias
 
-El sistema realiza scraping del contenido, limpia y resume el texto, detecta el idioma, analiza el sentimiento, clasifica el tema y guarda un registro de los resultados.
+Aplicación interactiva construida con Gradio que permite analizar automáticamente artículos de noticias a partir de una URL utilizando modelos avanzados de Procesamiento de Lenguaje Natural (NLP).
+
+El sistema no solo resume noticias, sino que también evalúa su sentimiento, sesgo, credibilidad y entidades, ofreciendo una visión mucho más completa del contenido mediático.
 
 ## 🚀 Funcionalidades
-- 🌐 Extracción automática de contenido de artículos desde la URL usando newspaper3k
-
-- ✂️ Resumen automático del texto con modelos BART de Hugging Face
-
-- 🌍 Detección de idioma (español / inglés) usando langdetect
-
-- 🔄 Traducción automática entre inglés y español con MarianMT
-
-- 💬 Análisis de sentimiento multilingüe con BERT
-
-- 🏷️ Clasificación temática automática (Política, Economía, Tecnología, Salud, Deportes u Otros) con zero-shot BART-MNLI
-
-- ⚡ Cache inteligente por URL: evita reprocesar artículos ya analizados
-
-- 🧾 Registro automático de resultados en un archivo CSV descargable
-
+- 📰 Análisis de contenido
+- 🌐 Extracción automática de artículos desde URL
+(fallback robusto con newspaper3k + trafilatura)
+- ✂️ Resumen automático con modelos BART
+- 🌍 Detección de idioma (es / en)
+- 🔄 Traducción automática entre español e inglés
+- 🧠 Análisis NLP avanzado
+- 💬 Análisis de sentimiento (Muy negativo → Muy positivo)
+- 🏷️ Clasificación temática automática
+- ⚖️ Detección de sesgo mediático:
+  - Neutral
+  - Sensacionalista
+  - Opinativo
+  - Propagandístico
+- 👤 Extracción de entidades:
+  - Personas
+  - Organizaciones
+  - Lugares
+- ⭐ Evaluación de calidad
+  - Cálculo de credibilidad (0–100) basado en:
+    - Longitud del contenido
+    - Presencia de fuentes
+    - Actualidad del artículo
+    - Dominio del medio
+- ⚡ Sistema inteligente
+  - Cache persistente con SQLite
+  - Expiración configurable de resultados
+  - Evita reprocesar URLs ya analizadas
+## 🧩 Funcionalidades avanzadas
+- 📋 Análisis en lote
+  - Procesa múltiples URLs en paralelo
+  - Optimizado con multithreading
+- ⚖️ Comparativa de fuentes
+  - Compara 2–3 artículos sobre el mismo tema
+  - Detecta diferencias en:
+    - Sentimiento
+    - Sesgo
+    - Enfoque temático
+- 📊 Estadísticas interactivas
+  - Distribución por tema
+  - Evolución del sentimiento
+  - Top dominios analizados
+- 📚 Historial persistente
+  - Almacenamiento en base de datos SQLite
+  - Consulta desde la interfaz
+- 📁 Exportación
+  - CSV
+  - JSON
 ## 🛠️ Tecnologías utilizadas
-- Gradio – Interfaz web interactiva
+- 🤖 NLP / IA
+  - facebook/bart-large-cnn → Resumen
+  - facebook/bart-large-mnli → Clasificación y sesgo (zero-shot)
+  - nlptown/bert-base-multilingual-uncased-sentiment → Sentimiento
+  - dslim/bert-base-NER → Entidades (NER)
+  - Helsinki-NLP MarianMT → Traducción
+- 📰 Procesamiento de contenido
+  - newspaper3k
+  - trafilatura
+- ⚙️ Backend
+  - Python
+  - PyTorch
+  - SQLite
+  - ThreadPoolExecutor (paralelismo)
+  - Tenacity (reintentos)
+  - Loguru (logging)
+- 📊 Frontend
+  - Gradio
+  - Plotly
+📦 Instalación
 
-- newspaper3k – Extracción y limpieza de noticias
-
-- transformers (Hugging Face) – Modelos BART, MarianMT, BERT y BART-MNLI
-
-- langdetect – Detección de idioma
-
-- torch – PyTorch, backend de modelos de NLP
-
-- pandas – Gestión de logs y CSV
-
-## 📦 Instalación
-.Clona el repositorio:
+Clona el repositorio:
 
 git clone https://github.com/Kevin-2099/analizador-ia-noticias.git
-
 cd analizador-ia-noticias
 
-.Crea un entorno virtual (opcional pero recomendado):
+Crea un entorno virtual (opcional pero recomendado):
 
 python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-source venv/bin/activate  # En Windows: venv\Scripts\activate
-
-Instala las dependencias:
+Instala dependencias:
 
 pip install -r requirements.txt
 
-Nota: Asegúrate de tener instalado pytorch correctamente según tu sistema. Consulta https://pytorch.org/get-started/locally/ si necesitas ayuda.
+⚠️ Asegúrate de tener PyTorch instalado correctamente:
+https://pytorch.org/get-started/locally/
 
-## 🧪 Uso
-Ejecuta el archivo principal para iniciar la interfaz web:
+🧪 Uso
+
+Ejecuta la aplicación:
 
 python app.py
 
-Luego abre el navegador en la dirección que Gradio indique (por defecto: http://127.0.0.1:7860).
+Abre el navegador en:
 
-## Instrucciones
-Introduce la URL de una noticia (en español o inglés) y selecciona el idioma de salida deseado
+http://127.0.0.1:7860
+📌 Cómo usar
+🔹 Análisis individual
+Introduce una URL
+Selecciona idioma de salida
+Haz clic en Analizar
+🔹 Análisis en lote
+Introduce múltiples URLs (una por línea)
+🔹 Comparativa
+Introduce 2 o 3 URLs para comparar cobertura mediática
+📊 Resultados obtenidos
+📰 Título y fecha
+🌍 Idioma original
+🏷️ Tema
+⚖️ Sesgo
+⭐ Credibilidad
+✂️ Resumen
+💬 Sentimiento
+👤 Entidades detectadas
+⚡ Indicador de caché
+📄 Licencia
 
-Espera unos segundos mientras el sistema procesa la noticia o la recupera desde cache
+Este proyecto está bajo licencia MIT.
+Consulta el archivo LICENSE para más información.
 
-Obtendrás:
+🤝 Contribuciones
 
-- 📰 Título y fecha del artículo
+Las contribuciones son bienvenidas.
 
-- 🌍 Idioma original detectado
+Puedes:
 
-- 🏷️ Tema clasificado automáticamente
-
-- ✂️ Resumen generado
-
-- 💬 Sentimiento estimado (Muy negativo → Muy positivo)
-
-- ⚡ Indicador si el resultado proviene de cache
-
-- 🧾 CSV con historial completo de análisis descargable
+Hacer fork del repositorio
+Crear una nueva rama (feature/nueva-funcionalidad)
+Enviar un pull request
 
 ## 📄 Licencia
 Este proyecto se distribuye bajo la licencia MIT. Ver archivo LICENSE para más detalles.
